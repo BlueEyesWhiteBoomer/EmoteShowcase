@@ -1,79 +1,26 @@
-function getUrlParameter(name) {
-    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-    let regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-    let results = regex.exec(location.search);
-    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-}
+let channelName = "BlueEyesWhiteBoomer";
+let customSize = 0;
 
-let fishTank = getUrlParameter('fishtank');
+//#region Developers Only [Do not change these values]
+let fishTank = "false";
+let seventv = "true"
+let emoteSize = "3"
+let botUser = "";
+let effect = "";
+let animationSpeed = 1;
+let duration = 1000 * 60 * 60 * 24;
 
-let bttv = getUrlParameter('bttv');
-
-let seventv = getUrlParameter('7tv');
-
-let ffz = getUrlParameter('ffz');
-
-let emoteSize = getUrlParameter('size');
-
-let customSize = getUrlParameter('customsize');
-customSize = parseInt(customSize);
-
-let botUser = getUrlParameter('bot');
-
-let effect = getUrlParameter('effect');
-
-if (!effect) {
-    effect = '';
-}
-
-// default value if size is not set in url
-if (!emoteSize) {
-    emoteSize = 3;
-}
-
-if (emoteSize !== 'random') {
-    // convert size string to integer
-    emoteSize = parseInt(emoteSize);
-}
-
-let animationSpeed = getUrlParameter('speed');
-
-// default value if speed is not set in url
-if (!animationSpeed) {
-    animationSpeed = 5000;
-}
-
-// convert animationSpeed string to integer
-animationSpeed = parseInt(animationSpeed);
-
-let duration = getUrlParameter('duration');
-duration = parseInt(duration);
-
-if (!duration) {
-    duration = 5000;
-}
-
-let channelName = getUrlParameter('channel');
-
+let channelName = "BlueEyesWhiteBoomer";
 if (channelName === '') {
     alert('Channel name is missing. Set ?channel=yourTwitchChannel in the URL and reload the browser');
 }
 
-let emoteLimit = getUrlParameter('emoteLimit');
-
-if (!emoteLimit) {
-    emoteLimit = 50;
-}
-
-let bttvEmotes = '';
-
+let emoteLimit = "99999999";
 let seventvEmotes = '';
 
-let ffzEmotes = '';
-
 // Dynamically get browser window width/height and set the #container.
-$(document).ready(function() {
-    $('#container').css({'height':window.innerHeight, 'width':window.innerWidth});
+$(document).ready(function () {
+    $('#container').css({ 'height': window.innerHeight, 'width': window.innerWidth });
 });
 
 function htmlEntities(html) {
@@ -104,15 +51,7 @@ function htmlEntities(html) {
 }
 
 function getRandomNumberBetween(min, max) {
-    return Math.floor(Math.random()*(max-min+1)+min);
-}
-
-function emoteScale(emoteSize) {
-    if (emoteSize === 'random') {
-        return getRandomNumberBetween(1, 3);
-    } else {
-        return emoteSize;
-    }
+    return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 function formatEmotes(text, emotes) {
@@ -129,40 +68,11 @@ function formatEmotes(text, emotes) {
                         return ''
                     });
                 splitText = splitText.slice(0, mote[0]).concat(empty).concat(splitText.slice(mote[0] + 1, splitText.length));
-                splitText.splice(mote[0], 0, "https://static-cdn.jtvnw.net/emoticons/v2/" + i + "/default/dark/" + emoteScale(emoteSize) + ".0,");
+                splitText.splice(mote[0], 0, "https://static-cdn.jtvnw.net/emoticons/v2/" + i + "/default/dark/" + 3 + ".0,");
             }
         }
     }
     return htmlEntities(splitText).join('')
-}
-
-// BTTV emotes
-if (bttv === 'true') {
-    // https://gist.github.com/chuckxD/377211b3dd3e8ca8dc505500938555eb
-    // Twitch API Gateway to lookup bttv emotes using the twitch channelName and user_id.
-    $.getJSON("https://twitchapi.teklynk.com/getbttvemotes.php?channel=" + channelName, function (result) {
-        bttvEmotes = result;
-    });
-}
-
-function doBttvEmotes(chatMessage) {
-
-    let bttvEmotesStr = '';
-
-    let chatMessageArr = chatMessage.split(' ');
-
-    chatMessageArr.forEach(function (item) {
-        for (let x in bttvEmotes) {
-            if (item === bttvEmotes[x]['code']) {
-                bttvEmotesStr += 'https://cdn.betterttv.net/emote/' + bttvEmotes[x]['id'] + '/' + emoteScale(emoteSize) + 'x,';
-            }
-        }
-    });
-
-    bttvEmotesStr = bttvEmotesStr.slice(0, -1);
-
-    return bttvEmotesStr;
-
 }
 
 // 7TV Emotes
@@ -182,7 +92,7 @@ function do7tvEmotes(chatMessage) {
     chatMessageArr.forEach(function (item) {
         for (let x in seventvEmotes) {
             if (item === seventvEmotes[x]['code']) {
-                seventvEmotesStr += 'https://cdn.7tv.app/emote/' + seventvEmotes[x]['id'] + '/' + emoteScale(emoteSize) + 'x.webp,';
+                seventvEmotesStr += 'https://cdn.7tv.app/emote/' + seventvEmotes[x]['id'] + '/' + 3 + 'x.webp,';
             }
         }
     });
@@ -190,34 +100,6 @@ function do7tvEmotes(chatMessage) {
     seventvEmotesStr = seventvEmotesStr.slice(0, -1);
 
     return seventvEmotesStr;
-
-}
-
-// FFZ Emotes
-if (ffz === 'true') {
-    // Twitch API Gateway to lookup ffz emotes using the twitch channelName and user_id.
-    $.getJSON("https://twitchapi.teklynk.com/getffzemotes.php?channel=" + channelName, function (result) {
-        ffzEmotes = result;
-    });
-}
-
-function doffzEmotes(chatMessage) {
-
-    let ffzEmotesStr = '';
-
-    let chatMessageArr = chatMessage.split(' ');
-
-    chatMessageArr.forEach(function (item) {
-        for (let x in ffzEmotes) {
-            if (item === ffzEmotes[x]['code']) {
-                ffzEmotesStr += 'https://cdn.frankerfacez.com/emote/' + seventvEmotes[x]['id'] + '/' + emoteScale(emoteSize);
-            }
-        }
-    });
-
-    ffzEmotesStr = ffzEmotesStr.slice(0, -1);
-
-    return ffzEmotesStr;
 
 }
 
@@ -237,7 +119,7 @@ const client = new tmi.Client({
         debug: true,
         skipUpdatingEmotesets: true
     },
-    connection: {reconnect: true},
+    connection: { reconnect: true },
     channels: [channelName]
 });
 
@@ -254,6 +136,7 @@ client.on('message', (channel, tags, message, self) => {
     }
 
     function doEmotes() {
+
         let randomNumHeight = Math.floor(Math.random() * (window.innerHeight - 1 + 1)) + 1;
         let randomNumWidth = Math.floor(Math.random() * (window.innerWidth - 1 + 1)) + 1;
         let chatemotes = tags.emotes;
@@ -262,44 +145,32 @@ client.on('message', (channel, tags, message, self) => {
         if (self) return;
 
         // If Twitch emotes
-        let chatEmote = formatEmotes('', chatemotes, emoteScale);
+        let chatEmote = formatEmotes('', chatemotes, 3);
 
         // Create emotes array
         let chatEmoteArr = chatEmote.split(',');
         chatEmoteArr = chatEmoteArr.filter(Boolean);
 
-        let bttvStr = doBttvEmotes(message, emoteScale);
-
-        let seventvStr = do7tvEmotes(message, emoteScale);
-
-        let ffzStr = doffzEmotes(message, emoteScale);
+        let seventvStr = do7tvEmotes(message, 3);
 
         // Set a limit on how many emotes can be displayed from each message
         let limitedEmoteArr = chatEmoteArr.filter((val, i) => i < parseInt(emoteLimit));
-
-        let BetterTTVEmoteArr = bttvStr.split(',');
-        BetterTTVEmoteArr = BetterTTVEmoteArr.filter((val, i) => i < parseInt(emoteLimit));
-        BetterTTVEmoteArr = BetterTTVEmoteArr.filter(Boolean);
 
         let SevenTVEmoteArr = seventvStr.split(',');
         SevenTVEmoteArr = SevenTVEmoteArr.filter((val, i) => i < parseInt(emoteLimit));
         SevenTVEmoteArr = SevenTVEmoteArr.filter(Boolean);
 
-        let ffzEmoteArr = ffzStr.split(',');
-        ffzEmoteArr = ffzEmoteArr.filter((val, i) => i < parseInt(emoteLimit));
-        ffzEmoteArr = ffzEmoteArr.filter(Boolean);
-
         let randomEffect;
-        let effectsArray = ['fade','grow','rotate','skew'];
+        let effectsArray = ['fade', 'grow', 'rotate', 'skew'];
 
         if (effect === 'random') {
-            randomEffect = effectsArray[Math.floor(Math.random()*effectsArray.length)];
+            randomEffect = effectsArray[Math.floor(Math.random() * effectsArray.length)];
         }
 
-        // Debugging
-        //console.log(limitedEmoteArr);
-
+        //Regular Emotes
         if (limitedEmoteArr.length !== 0) {
+            //Clear previous emotes
+            $("#container").empty();
 
             $.each(limitedEmoteArr, function (key, value) {
                 if (value > "" || value !== null) {
@@ -328,93 +199,45 @@ client.on('message', (channel, tags, message, self) => {
                 }
             });
 
+            /*
+            //Only Save last emote
+            var save = $('#container :last-child :last-child').detach();
+            $('#container').empty().append(save);
+            */
         }
 
-        if (bttv === 'true') {
-            // BetterTTV Emotes
-            if (BetterTTVEmoteArr.length !== 0) {
+        // SevenTV Emotes
+        if (SevenTVEmoteArr.length !== 0) {
+            //Clear previous emotes
+            $("#container").empty();
 
-                $.each(BetterTTVEmoteArr, function (key, value) {
-                    if (value > "" || value !== null) {
+            $.each(SevenTVEmoteArr, function (key, value) {
+                if (value > "" || value !== null) {
 
-                        // randomize location
-                        $("<div class='latestblock'><img src='" + value + "' /></div>").appendTo("#container").css({
-                            top: randomNumHeight + 'px',
-                            left: randomNumWidth + 'px'
-                        });
+                    // randomize location
+                    $("<div class='latestblock'><img src='" + value + "' /></div>").appendTo("#container").css({
+                        top: randomNumHeight + 'px',
+                        left: randomNumWidth + 'px'
+                    });
 
-                        if (effect) {
-                            $('.latestblock img:first-child').addClass(effect);
-                        }
-
-                        if (fishTank === 'false' || fishTank === '' || !fishTank) {
-                            fadeInOut($('.latestblock img:first-child'));
-                        } else {
-                            $('.latestblock img').fadeIn(animationSpeed);
-                        }
-
+                    if (effect) {
+                        $('.latestblock img:first-child').addClass(effect);
                     }
-                });
 
-            }
-        }
-
-        if (seventv === 'true') {
-            // SevenTV Emotes
-            if (SevenTVEmoteArr.length !== 0) {
-
-                $.each(SevenTVEmoteArr, function (key, value) {
-                    if (value > "" || value !== null) {
-
-                        // randomize location
-                        $("<div class='latestblock'><img src='" + value + "' /></div>").appendTo("#container").css({
-                            top: randomNumHeight + 'px',
-                            left: randomNumWidth + 'px'
-                        });
-
-                        if (effect) {
-                            $('.latestblock img:first-child').addClass(effect);
-                        }
-
-                        if (fishTank === 'false' || fishTank === '' || !fishTank) {
-                            fadeInOut($('.latestblock img:first-child'));
-                        } else {
-                            $('.latestblock img').fadeIn(animationSpeed);
-                        }
-
+                    if (fishTank === 'false' || fishTank === '' || !fishTank) {
+                        fadeInOut($('.latestblock img:first-child'));
+                    } else {
+                        $('.latestblock img').fadeIn(animationSpeed);
                     }
-                });
 
-            }
-        }
+                }
+            });
 
-        if (ffz === 'true') {
-            // FFZ Emotes
-            if (ffzEmoteArr.length !== 0) {
-
-                $.each(ffzEmoteArr, function (key, value) {
-                    if (value > "" || value !== null) {
-
-                        // randomize location
-                        $("<div class='latestblock'><img src='" + value + "' /></div>").appendTo("#container").css({
-                            top: randomNumHeight + 'px',
-                            left: randomNumWidth + 'px'
-                        });
-
-                        if (effect) {
-                            $('.latestblock img:first-child').addClass(effect);
-                        }
-
-                        if (fishTank === 'false' || fishTank === '' || !fishTank) {
-                            fadeInOut($('.latestblock img:first-child'));
-                        } else {
-                            $('.latestblock img').fadeIn(animationSpeed);
-                        }
-
-                    }
-                });
-
-            }
+            /*
+            //Only Save last emote
+            var save = $('#container :last-child :last-child').detach();
+            $('#container').empty().append(save);
+            */
         }
 
         //do this after dom latestblock have been created
@@ -425,10 +248,6 @@ client.on('message', (channel, tags, message, self) => {
                 'width': customSize + 'px',
                 'height': customSize + 'px'
             });
-        }
-
-        function randomFromTo(from, to) {
-            return Math.floor(Math.random() * (to - from + 1) + from);
         }
 
         function moveRandom(obj) {
@@ -453,13 +272,9 @@ client.on('message', (channel, tags, message, self) => {
             minY = cPos.top + pad;
             minX = cPos.left + pad;
 
-            // set new position
-            newY = randomFromTo(minY, maxY);
-            newX = randomFromTo(minX, maxX);
-
             obj.animate({
-                top: newY,
-                left: newX
+                top: 0,
+                left: 0
             }, animationSpeed, function () {
                 moveRandom(obj);
             });
@@ -471,3 +286,4 @@ client.on('message', (channel, tags, message, self) => {
     }
 
 });
+//#endregion
