@@ -10,7 +10,6 @@ let effect = "";
 let animationSpeed = 1;
 let duration = 1000 * 60 * 60 * 24;
 
-let channelName = "BlueEyesWhiteBoomer";
 if (channelName === '') {
     alert('Channel name is missing. Set ?channel=yourTwitchChannel in the URL and reload the browser');
 }
